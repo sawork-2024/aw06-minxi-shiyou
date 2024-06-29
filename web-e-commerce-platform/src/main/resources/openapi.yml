@@ -1,0 +1,1836 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Products
+  license:
+    name: MIT
+paths:
+  /users:
+    get:
+      summary: List all users
+      operationId: listUsers
+      tags:
+        - users
+      responses:
+        '200':
+          description: A paged array of users
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Users"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      tags:
+        - user
+      operationId: addUser
+      summary: Create a user
+      description: Creates a user.
+      requestBody:
+        description: The user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserFields'
+        required: true
+      responses:
+        201:
+          description: User created successfully.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        304:
+          description: Not modified.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+        400:
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /users/login:
+    post:
+      tags:
+        - user
+      operationId: loginUser
+      summary: Login a user
+      description: Login a user.
+      requestBody:
+        description: The user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        '400':
+          description: Uid cannot be empty
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        '401':
+          description: Invalid uid or password
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        '404':
+          description: Invalid username
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /users/{userId}:
+    get:
+      summary: Info for a specific user
+      operationId: showUserByUid
+      tags:
+        - user
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: The id of the user to retrieve
+          schema:
+            type: long
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      tags:
+        - user
+      operationId: updateUser
+      summary: Update a user's details
+      description: Updates the user record with the specified details.
+      parameters:
+        - name: userId
+          in: path
+          description: The ID of the user.
+          required: true
+          schema:
+            type: long
+      requestBody:
+        description: The user details to use for the update.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserFields'
+        required: true
+      responses:
+        200:
+          description: User details found and returned.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        304:
+          description: Not modified.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+        400:
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      tags:
+        - user
+      operationId: deleteUser
+      summary: Delete a user by ID
+      description: Returns the user or a 404 error.
+      parameters:
+        - name: userId
+          in: path
+          description: The ID of the user.
+          required: true
+          schema:
+            type: long
+      responses:
+        200:
+          description: User details found and returned.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        204:
+          description: Delete Ok
+        304:
+          description: Not modified.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+        400:
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /users/{userId}/charge:
+    put:
+      summary: charge for the user
+      operationId: chargeUserByUid
+      tags:
+        - user
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: The id of the user to retrieve
+          schema:
+            type: long
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /products:
+    get:
+      summary: List all products
+      operationId: listProducts
+      tags:
+        - products
+      responses:
+        '200':
+          description: A paged array of products
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Products"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      tags:
+        - product
+      operationId: addProduct
+      summary: Create a product
+      description: Creates a product.
+      requestBody:
+        description: The product
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductFields'
+        required: true
+      responses:
+        201:
+          description: Product created successfully.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        304:
+          description: Not modified.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+        400:
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /products/{productId}:
+    get:
+      summary: Info for a specific product
+      operationId: showProductById
+      tags:
+        - product
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          description: The id of the product to retrieve
+          schema:
+            type: long
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      tags:
+        - product
+      operationId: updateProduct
+      summary: Update a product's details
+      description: Updates the product record with the specified details.
+      parameters:
+        - name: productId
+          in: path
+          description: The ID of the product.
+          required: true
+          schema:
+            type: long
+      requestBody:
+        description: The product details to use for the update.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductFields'
+        required: true
+      responses:
+        200:
+          description: Product details found and returned.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        304:
+          description: Not modified.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+        400:
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    patch:
+      tags:
+        - product
+      operationId: patchProduct
+      summary: Change product's quantity
+      parameters:
+        - name: productId
+          in: path
+          description: The ID of the product.
+          required: true
+          schema:
+            type: long
+      requestBody:
+        description: The product details to use for the update.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                price:
+                  type: double
+                  minimum: 0
+                image:
+                  type: string
+                quantity:
+                  type: integer
+                  format: int32
+                  minimum: 0
+        required: true
+      responses:
+        200:
+          description: Product details found and returned.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        304:
+          description: Not modified.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+        400:
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      tags:
+        - product
+      operationId: deleteProduct
+      summary: Delete a product by ID
+      description: Returns the product or a 404 error.
+      parameters:
+        - name: productId
+          in: path
+          description: The ID of the product.
+          required: true
+          schema:
+            type: long
+      responses:
+        200:
+          description: Product details found and returned.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        204:
+          description: Delete Ok
+        304:
+          description: Not modified.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+        400:
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: Porduct not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /products/getByName/{productName}:
+    get:
+      summary: Info for a specific product
+      operationId: showProductByName
+      tags:
+        - products
+      parameters:
+        - name: productName
+          in: path
+          required: true
+          description: The name of the product to retrieve
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Products"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /products/search:
+    get:
+      summary: Info for a specific product
+      operationId: searchProductByName
+      tags:
+        - products
+      parameters:
+        - name: productName
+          in: query
+          required: false
+          description: The name of the product to retrieve
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Products"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /items:
+    get:
+      summary: List all items
+      operationId: listItems
+      tags:
+        - items
+      responses:
+        '200':
+          description: A paged array of items
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Items"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      tags:
+        - item
+      operationId: addItem
+      summary: Create a item
+      description: Creates a item.
+      requestBody:
+        description: The item
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemFields'
+        required: true
+      responses:
+        201:
+          description: Item created successfully.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        304:
+          description: Not modified.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+        400:
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /items/{itemId}:
+    get:
+      summary: Info for a specific item
+      operationId: showItemById
+      tags:
+        - item
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          description: The id of the item to retrieve
+          schema:
+            type: long
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Item"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      tags:
+        - item
+      operationId: updateItem
+      summary: Update a item's details
+      description: Updates the item record with the specified details.
+      parameters:
+        - name: itemId
+          in: path
+          description: The ID of the item.
+          required: true
+          schema:
+            type: long
+      requestBody:
+        description: The item details to use for the update.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemFields'
+        required: true
+      responses:
+        200:
+          description: Item details found and returned.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        304:
+          description: Not modified.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+        400:
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      tags:
+        - item
+      operationId: deleteItem
+      summary: Delete an item by ID
+      description: Returns the item or a 404 error.
+      parameters:
+        - name: itemId
+          in: path
+          description: The ID of the item.
+          required: true
+          schema:
+            type: long
+      responses:
+        200:
+          description: Item details found and returned.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        204:
+          description: Delete Ok
+        304:
+          description: Not modified.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+        400:
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: Item not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /items/{itemId}/addone:
+    put:
+      tags:
+        - item
+      operationId: addItemById
+      parameters:
+        - name: itemId
+          in: path
+          description: The ID of the item.
+          required: true
+          schema:
+            type: long
+      responses:
+        200:
+          description: Item details found and returned.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        304:
+          description: Not modified.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+        400:
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /items/{itemId}/subone:
+    put:
+      tags:
+        - item
+      operationId: subItemById
+      parameters:
+        - name: itemId
+          in: path
+          description: The ID of the item.
+          required: true
+          schema:
+            type: long
+      responses:
+        200:
+          description: Item details found and returned.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        304:
+          description: Not modified.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+        400:
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /users/{userId}/{productId}:
+    post:
+      tags:
+        - item
+      operationId: addProductToUser
+      summary: Adds a product to a user
+      parameters:
+        - name: userId
+          in: path
+          description: The ID of the user.
+          required: true
+          schema:
+            type: long
+        - name: productId
+          in: path
+          description: The ID of the product.
+          required: true
+          schema:
+            type: long
+      responses:
+        201:
+          description: The item was sucessfully added.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        400:
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /users/{userId}/items:
+    get:
+      summary: List all items of a user
+      operationId: listUsersItems
+      tags:
+        - items
+      parameters:
+        - name: userId
+          in: path
+          description: The ID of the user.
+          required: true
+          schema:
+            type: long
+      responses:
+        '200':
+          description: A paged array of items
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Items"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      tags:
+        - item
+      operationId: addItemToUser
+      summary: Adds a item to a user
+      description: Records the details of a new item.
+      parameters:
+        - name: userId
+          in: path
+          description: The ID of the user.
+          required: true
+          schema:
+            type: long
+      requestBody:
+        description: The details of the new item.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemFields'
+        required: true
+      responses:
+        201:
+          description: The item was sucessfully added.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        400:
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /users/{userId}/items/{itemId}:
+    get:
+      tags:
+        - item
+      operationId: getUsersItem
+      summary: Get a item by ID
+      description: Returns the item or a 404 error.
+      parameters:
+        - name: userId
+          in: path
+          description: The ID of the user.
+          required: true
+          schema:
+            type: long
+        - name: itemId
+          in: path
+          description: The ID of the item.
+          required: true
+          schema:
+            type: long
+      responses:
+        200:
+          description: Item details found and returned.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        304:
+          description: Not modified.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+        400:
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: Item not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      tags:
+        - item
+      operationId: deleteUsersItem
+      summary: Delete an item by ID in a User
+      description: Returns the item or a 404 error.
+      parameters:
+        - name: userId
+          in: path
+          description: The ID of the user.
+          required: true
+          schema:
+            type: long
+        - name: itemId
+          in: path
+          description: The ID of the item.
+          required: true
+          schema:
+            type: long
+      responses:
+        200:
+          description: Item details found and returned.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        204:
+          description: Delete Ok
+        304:
+          description: Not modified.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+        400:
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      tags:
+        - item
+      operationId: updateUsersItem
+      summary: Update a item's details
+      description: Updates the item record with the specified details.
+      parameters:
+        - name: userId
+          in: path
+          description: The ID of the user.
+          required: true
+          schema:
+            type: long
+        - name: itemId
+          in: path
+          description: The ID of the item.
+          required: true
+          schema:
+            type: long
+      requestBody:
+        description: The item details to use for the update.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemFields'
+        required: true
+      responses:
+        200:
+          description: Item details found and returned.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        304:
+          description: Not modified.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+        400:
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: Item not found for this user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /users/{userId}/items/{itemId}/addone:
+    put:
+      tags:
+        - item
+      operationId: addUsersItemById
+      parameters:
+        - name: userId
+          in: path
+          description: The ID of the user.
+          required: true
+          schema:
+            type: long
+        - name: itemId
+          in: path
+          description: The ID of the item.
+          required: true
+          schema:
+            type: long
+      responses:
+        200:
+          description: Item details found and returned.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        304:
+          description: Not modified.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+        400:
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /users/{userId}/items/{itemId}/subone:
+    put:
+      tags:
+        - item
+      operationId: subUsersItemById
+      parameters:
+        - name: userId
+          in: path
+          description: The ID of the user.
+          required: true
+          schema:
+            type: long
+        - name: itemId
+          in: path
+          description: The ID of the item.
+          required: true
+          schema:
+            type: long
+      responses:
+        200:
+          description: Item details found and returned.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        304:
+          description: Not modified.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+        400:
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /users/{userId}/products:
+    get:
+      summary: List all products of a owner
+      operationId: listOwnersProducts
+      tags:
+        - products
+      parameters:
+        - name: userId
+          in: path
+          description: The ID of the owner.
+          required: true
+          schema:
+            type: long
+      responses:
+        '200':
+          description: A paged array of products
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Products"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      tags:
+        - product
+      operationId: addProductToOwner
+      summary: Adds a product to a owner
+      description: Records the details of a new product.
+      parameters:
+        - name: userId
+          in: path
+          description: The ID of the owner.
+          required: true
+          schema:
+            type: long
+      requestBody:
+        description: The details of the new product.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductFields'
+        required: true
+      responses:
+        201:
+          description: The product was sucessfully added.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        400:
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /users/{userId}/products/{productId}:
+    get:
+      tags:
+        - product
+      operationId: getOwnersProduct
+      summary: Get a product by ID
+      description: Returns the product or a 404 error.
+      parameters:
+        - name: userId
+          in: path
+          description: The ID of the user.
+          required: true
+          schema:
+            type: long
+        - name: productId
+          in: path
+          description: The ID of the product.
+          required: true
+          schema:
+            type: long
+      responses:
+        200:
+          description: Item details found and returned.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        304:
+          description: Not modified.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+        400:
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: Item not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      tags:
+        - product
+      operationId: deleteOwnersProduct
+      summary: Delete a product by ID in a Owner
+      description: Returns the product or a 404 error.
+      parameters:
+        - name: userId
+          in: path
+          description: The ID of the user.
+          required: true
+          schema:
+            type: long
+        - name: productId
+          in: path
+          description: The ID of the product.
+          required: true
+          schema:
+            type: long
+      responses:
+        200:
+          description: Item details found and returned.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        204:
+          description: Delete Ok
+        304:
+          description: Not modified.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+        400:
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: Owner not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      tags:
+        - product
+      operationId: updateOwnersProduct
+      summary: Update a product's details
+      description: Updates the product record with the specified details.
+      parameters:
+        - name: userId
+          in: path
+          description: The ID of the user.
+          required: true
+          schema:
+            type: long
+        - name: productId
+          in: path
+          description: The ID of the product.
+          required: true
+          schema:
+            type: long
+      requestBody:
+        description: The product details to use for the update.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductFields'
+        required: true
+      responses:
+        200:
+          description: Product details found and returned.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        304:
+          description: Not modified.
+          headers:
+            ETag:
+              description: An ID for this version of the response.
+              schema:
+                type: string
+        400:
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: Item not found for this user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  schemas:
+    UserFields:
+      type: object
+      properties:
+        name:
+          title: name
+          description: The name of the user.
+          type: string
+          minLength: 1
+          maxLength: 30
+#          pattern: '^\w*$'
+          example: George
+        email:
+          title: Email
+          description: The email of the user.
+          type: string
+          minLength: 1
+          maxLength: 255
+#          pattern: '^\w+@\w+\.\w+$'
+          example: 'abc@ef.com'
+        pass:
+          title: Password
+          description: The password of the user.
+          type: string
+          format: password
+          minLength: 1
+          maxLength: 80
+          example: '123456789'
+        money:
+          title: Money
+          description: The money of the user.
+          type: double
+          minimum: 0
+        address:
+          type: string
+          minLength: 1
+          maxLength: 20
+#          pattern: '^\w*$'
+          example: '10086'
+        contact:
+          type: string
+#          pattern: '^\w*$'
+        image:
+          type: string
+    User:
+      title: User
+      allOf:
+        - $ref: '#/components/schemas/UserFields'
+        - type: object
+          properties:
+            id:
+              type: long
+            uid:
+              type: long
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/Item'
+            products:
+              type: array
+              items:
+                $ref: '#/components/schemas/Product'
+          required:
+            - uid
+    ProductFields:
+      type: object
+      properties:
+        name:
+          type: string
+        price:
+          type: double
+          minimum: 0
+        image:
+          type: string
+        quantity:
+          type: integer
+          format: int32
+          minimum: 0
+        ownerId:
+          type: long
+      required:
+        - ownerId
+    Product:
+      allOf:
+        - $ref: '#/components/schemas/ProductFields'
+        - type: object
+          properties:
+            id:
+              type: long
+          required:
+            - id
+    ItemFields:
+      type: object
+      properties:
+        productId:
+          type: long
+        quantity:
+          type: integer
+          format: int32
+          minimum: 0
+      required:
+        - productId
+        - quantity
+    Item:
+      allOf:
+        - $ref: '#/components/schemas/ItemFields'
+        - type: object
+          properties:
+            id:
+              type: long
+            userId:
+              type: long
+          required:
+            - id
+    Users:
+      type: array
+      items:
+        $ref: "#/components/schemas/User"
+    Products:
+      type: array
+      items:
+        $ref: "#/components/schemas/Product"
+    Items:
+      type: array
+      items:
+        $ref: "#/components/schemas/Item"
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
